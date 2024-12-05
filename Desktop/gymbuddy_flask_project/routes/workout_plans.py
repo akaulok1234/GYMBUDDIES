@@ -12,10 +12,25 @@ def add_workout_plan():
             'steps': request.json.get('steps'),
             'estimated_duration': request.json.get('estimated_duration'),
             'target_muscle_groups': request.json.get('target_muscle_groups'),
-            'session_id': request.json.get('session_id')
+            'session_id': request.json.get('session_id'),
+            'approved': False
         }
         plan_ref = db.collection('WorkoutPlans').add(plan_data)
         return jsonify({'message': 'Workout plan added to session!', 'plan_id': plan_ref[1].id}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@workout_plans_blueprint.route('/approve_workout_plan/<plan_id>', methods=['PATCH'])
+def approve_workout_plan(plan_id):
+    """
+    Approve a workout plan by setting the 'approved' field to True.
+    """
+    try:
+        # Fetch the specific workout plan by its ID
+        plan_ref = db.collection('WorkoutPlans').document(plan_id)
+        # Update the 'approved' field
+        plan_ref.update({'approved': True})
+        return jsonify({'message': f'Workout plan {plan_id} approved successfully!'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
